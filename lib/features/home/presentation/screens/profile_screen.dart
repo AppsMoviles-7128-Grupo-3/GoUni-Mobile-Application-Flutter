@@ -1,160 +1,84 @@
 import 'package:flutter/material.dart';
-import 'package:gouni_flutter/core/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+import 'package:gouni_flutter/domain/provider/user_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildProfileHeader(),
-            _buildProfileOptions(),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: const Text('Mi Perfil')),
+      body: user == null
+          ? const Center(child: Text('No se pudo cargar el usuario'))
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Información Personal',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _profileRow('Nombre:', user.name),
+                          _profileRow('Email:', user.email),
+                          _profileRow('Universidad:', user.university),
+                          _profileRow('Código de Usuario:', user.userCode),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.logout),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    label: const Text('Cerrar sesión'),
+                    onPressed: () async {
+                      // Limpia el usuario del provider
+                      Provider.of<UserProvider>(context, listen: false).clearUser();
+                      // Opcional: Llama a tu AuthRepository.logout() si necesitas limpiar tokens, etc.
+                      // Navega al login y elimina el historial
+                      Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
+                    },
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
-  Widget _buildProfileHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      color: AppColors.primary.withOpacity(0.1),
-      child: Column(
-        children: [
-          const CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage('assets/images/user_placeholder.png'),
-          ),
-          const SizedBox(height: 15),
-          const Text(
-            'Juan Pérez',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            'Estudiante - UPC',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                children: [
-                  const Text(
-                    '4.8',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Calificación',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 30),
-              Column(
-                children: [
-                  const Text(
-                    '12',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Viajes',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 30),
-              Column(
-                children: [
-                  const Text(
-                    '100%',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Puntualidad',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileOptions() {
+  Widget _profileRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
         children: [
-          _buildProfileOption(
-            icon: Icons.person,
-            title: 'Editar perfil',
-            onTap: () {},
+          Expanded(
+            flex: 2,
+            child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
           ),
-          _buildProfileOption(
-            icon: Icons.credit_card,
-            title: 'Métodos de pago',
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.history,
-            title: 'Historial de viajes',
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.star,
-            title: 'Calificaciones',
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.notifications,
-            title: 'Notificaciones',
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.security,
-            title: 'Seguridad',
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.help,
-            title: 'Ayuda',
-            onTap: () {},
-          ),
-          _buildProfileOption(
-            icon: Icons.logout,
-            title: 'Cerrar sesión',
-            color: Colors.red,
-            onTap: () {},
+          Expanded(
+            flex: 3,
+            child: Text(value, style: const TextStyle(color: Colors.black87)),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildProfileOption({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      elevation: 0,
-      child: ListTile(
-        leading: Icon(icon, color: color ?? AppColors.primary),
-        title: Text(title, style: TextStyle(color: color ?? Colors.black)),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
       ),
     );
   }

@@ -5,6 +5,8 @@ import 'package:gouni_flutter/data/repository/auth_repository_impl.dart';
 import 'package:gouni_flutter/domain/model/user.dart';
 import 'package:gouni_flutter/domain/repository/auth_repository.dart';
 import 'package:gouni_flutter/presentation/state/ui_state.dart';
+import 'package:provider/provider.dart';
+import 'package:gouni_flutter/domain/provider/user_provider.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function(String userId) onSignInSuccess;
@@ -66,6 +68,8 @@ class _LoginPageState extends State<LoginPage> {
         _authState = UiState.success(result.data!);
         _currentUser = result.data;
       });
+
+      Provider.of<UserProvider>(context, listen: false).setUser(result.data!);
 
       widget.onSignInSuccess(result.data!.id);
     } else {

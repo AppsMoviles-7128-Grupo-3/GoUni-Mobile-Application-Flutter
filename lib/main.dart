@@ -9,9 +9,18 @@ import 'package:gouni_flutter/presentation/reset_password_page.dart';
 import 'package:gouni_flutter/features/home/presentation/screens/home_screen.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/search_trips_screen.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/trip_detail_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:gouni_flutter/domain/provider/user_provider.dart';
 
 void main() {
-  runApp(const GoUniApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const GoUniApp(),
+    ),
+  );
 }
 
 class GoUniApp extends StatelessWidget {

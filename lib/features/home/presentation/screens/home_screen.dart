@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gouni_flutter/core/constants/app_colors.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/search_trips_screen.dart';
+import 'package:gouni_flutter/features/home/presentation/screens/profile_screen.dart';
 // import 'package:gouni_flutter/features/trips/presentation/screens/trips_screen.dart'; // Commented out as TripsScreen does not exist
 
 class HomeScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const HomeContentScreen(),
     const SearchTripsScreen(),
     Placeholder(), 
-    Placeholder(),
+    const ProfileScreen(),
   ];
 
   @override
