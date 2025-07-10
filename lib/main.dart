@@ -6,41 +6,9 @@ import 'package:gouni_flutter/presentation/forgot_password_page.dart';
 import 'package:gouni_flutter/presentation/login_page.dart';
 import 'package:gouni_flutter/presentation/register_page.dart';
 import 'package:gouni_flutter/presentation/reset_password_page.dart';
-
-//import 'data/auth/auth_remote_data_source.dart';
-//import 'data/auth/auth_repository_impl.dart';
-//import 'domain/auth/auth_repository.dart';
-//import 'presentation/auth/auth_controller.dart';
-//import 'presentation/auth/login_page.dart'; // tu login
-
-/*void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  //await Firebase.initializeApp();
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'GoUni',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: AppColors.primarySwatch,
-        fontFamily: 'Roboto',
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.black),
-        ),
-      ),
-      home: const LoginScreen(),
-    );
-  }
-}*/
+import 'package:gouni_flutter/features/home/presentation/screens/home_screen.dart';
+import 'package:gouni_flutter/features/trips/presentation/screens/search_trips_screen.dart';
+import 'package:gouni_flutter/features/trips/presentation/screens/trip_detail_screen.dart';
 
 void main() {
   runApp(const GoUniApp());
@@ -65,8 +33,7 @@ class GoUniApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (context) => LoginPage(
                 onSignInSuccess: (userId) {
-                  // Aquí decides qué hacer después del login
-                  debugPrint('Usuario autenticado: $userId');
+                  Navigator.pushReplacementNamed(context, '/home');
                 },
                 onNavigateToSignUp: () {
                   Navigator.pushNamed(context, '/signup');
@@ -76,12 +43,10 @@ class GoUniApp extends StatelessWidget {
                 },
               ),
             );
-
           case '/signup':
             return MaterialPageRoute(
               builder: (context) => RegisterPage(
                 onSignUpSuccess: (userId) {
-                  // Luego del registro, redirige a login o dashboard
                   Navigator.pushNamedAndRemoveUntil(context, '/signin', (r) => false);
                 },
                 onNavegateToLogin: () {
@@ -89,33 +54,20 @@ class GoUniApp extends StatelessWidget {
                 },
               ),
             );
-
-          case '/forgot-password':
+          case '/home':
             return MaterialPageRoute(
-              builder: (context) => ForgotPasswordPage(
-                onNavigateBack: () {
-                  Navigator.pop(context);
-                },
-                onNavigateToResetPassword: (email) {
-                  Navigator.pushNamed(context, '/reset-password', arguments: email);
-                },
-              ),
+              builder: (context) => const HomeScreen(),
             );
-
-          case '/reset-password':
-            final email = settings.arguments as String;
+          case '/search-trips':
             return MaterialPageRoute(
-              builder: (context) => ResetPasswordPage(
-                email: email,
-                onNavigateBack: () => Navigator.pop(context),
-                onNavigateToSignIn: () => Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/signin',
-                  (route) => false,
-                ),
-              ),
+              builder: (context) => const SearchTripsScreen(),
             );
-
+          case '/trip-detail':
+            final tripData = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => TripDetailScreen(tripData: tripData),
+            );
+          // Agrega aquí más rutas según tus necesidades
           default:
             return null;
         }

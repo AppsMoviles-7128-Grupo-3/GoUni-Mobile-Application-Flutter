@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gouni_flutter/core/constants/app_colors.dart';
 import 'package:gouni_flutter/core/widgets/custom_button.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/booking_confirmation_screen.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class TripDetailScreen extends StatelessWidget {
   final Map<String, dynamic> tripData;
@@ -17,6 +18,7 @@ class TripDetailScreen extends StatelessWidget {
           children: [
             _buildDriverInfo(),
             _buildTripDetails(),
+            _buildMapSection(), // <-- Aquí se muestra el mapa
             _buildTripDescription(),
             _buildBookingButton(context),
           ],
@@ -160,6 +162,44 @@ class TripDetailScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMapSection() {
+    // Coordenadas de ejemplo, reemplaza por las reales de tu modelo
+    final LatLng start = const LatLng(-12.0921, -77.0465); // San Miguel
+    final LatLng end = const LatLng(-12.1057, -76.9634);   // Monterrico
+
+    return Container(
+      height: 220,
+      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: start,
+            zoom: 12,
+          ),
+          markers: {
+            Marker(markerId: const MarkerId('start'), position: start, infoWindow: const InfoWindow(title: 'Partida')),
+            Marker(markerId: const MarkerId('end'), position: end, infoWindow: const InfoWindow(title: 'Destino')),
+          },
+          polylines: {
+            Polyline(
+              polylineId: const PolylineId('route'),
+              color: Colors.blue,
+              width: 4,
+              points: [start, end],
+            ),
+          },
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
         ),
       ),
     );

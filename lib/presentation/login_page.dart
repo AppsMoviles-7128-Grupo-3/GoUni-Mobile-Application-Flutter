@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   UiState<User>? _authState;
   User? _currentUser;
 
-  final Dio dio = Dio(BaseOptions(baseUrl: 'http://192.168.18.X:8080/api/'));
+  final Dio dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8080/api/'));  // http://192.168.18.X:8080/api/
   late final UserApi _userApi = UserApi(dio);
   late final AuthRepository _authRepository;
 

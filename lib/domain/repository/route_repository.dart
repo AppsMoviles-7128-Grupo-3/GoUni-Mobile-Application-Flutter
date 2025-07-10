@@ -13,11 +13,7 @@ class Result<T> {
 
 
 abstract class RouteRepository {
-  Future<Result<String>> createRoute(Route route);
-
-  Stream<List<Route>> getMyRoutes(String driverId);
-
-  Future<Result<void>> deleteRoute(String routeId);
-
+  Future<List<Route>> getAllRoutes();
+  Stream<List<Route>> getMyRoutes(String userId);
   Stream<Route?> getRouteById(String routeId);
 }
