@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gouni_flutter/main.dart';
 
-void main() {
+/*void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
@@ -24,6 +24,25 @@ void main() {
     await tester.pump();
 
     // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+  });
+}*/
+
+void main() {
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Construye la app principal y renderiza el primer frame
+    await tester.pumpWidget(const GoUniApp());
+
+    // Verifica que el contador comience en 0
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+
+    // Encuentra el botón con ícono '+' y simula un toque
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    // Verifica que el contador se haya incrementado a 1
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
   });
