@@ -33,6 +33,16 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
     'DOMINGO'
   ];
 
+  final Map<String, String> _daysMap = {
+    'LUNES': 'MONDAY',
+    'MARTES': 'TUESDAY',
+    'MIERCOLES': 'WEDNESDAY',
+    'JUEVES': 'THURSDAY',
+    'VIERNES': 'FRIDAY',
+    'SABADO': 'SATURDAY',
+    'DOMINGO': 'SUNDAY',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -72,8 +82,10 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
     if (_routes == null) return;
     List<domain.Route> filtered = _routes!;
     if (_selectedDay != null) {
+      // Si usas el mapa, filtra así:
+      final backendDay = _daysMap[_selectedDay!] ?? _selectedDay!;
       filtered = filtered.where((route) =>
-          route.days.map((d) => d.toUpperCase()).contains(_selectedDay)
+        route.days.contains(backendDay)
       ).toList();
     }
     if (_selectedTime != null) {
@@ -133,10 +145,10 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
                   child: DropdownButtonFormField<String>(
                     value: _selectedDay,
                     hint: const Text('Día'),
-                    items: _daysOfWeek.map((day) {
+                    items: _daysMap.keys.map((dayEs) {
                       return DropdownMenuItem(
-                        value: day,
-                        child: Text(day[0] + day.substring(1).toLowerCase()),
+                        value: dayEs,
+                        child: Text(dayEs[0] + dayEs.substring(1).toLowerCase()),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -202,7 +214,7 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
                         Navigator.pushNamed(
                           context,
                           '/trip-detail',
-                          arguments: {'route': route},
+                          arguments: route,
                         );
                       },
                     );
