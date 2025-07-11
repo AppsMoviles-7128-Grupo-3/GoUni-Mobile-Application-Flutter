@@ -1,5 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:gouni_flutter/presentation/register_page.dart';
+import 'package:gouni_flutter/data/remote/api/user_api.dart';
 import 'package:gouni_flutter/presentation/state/ui_state.dart';
 
 class ResetPasswordPage extends StatefulWidget {
@@ -28,6 +29,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   UiState<void> resetPasswordState = UiState.idle();
 
   @override
+  void initState() {
+    super.initState();
+
+    newPasswordCtrl.addListener(() => setState(() {}));
+    confirmPasswordCtrl.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
     newPasswordCtrl.dispose();
     confirmPasswordCtrl.dispose();
@@ -36,16 +45,26 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   Future<void> resetPassword(String email, String newPassword) async {
     setState(() => resetPasswordState = UiState.loading());
-    await Future.delayed(const Duration(seconds: 2));
 
-    if (newPassword.length >= 6) {
+  try {
+    final dio = Dio(BaseOptions(
+      baseUrl: 'https://adaptable-clarity-production.up.railway.app/api', // ✅ tu URL de producción
+    ));
+    
+    final response = await UserApi(dio).resetPassword(email, newPassword);
+
+    if (response.statusCode == 200) {
       setState(() => resetPasswordState = UiState.success(null));
       Future.delayed(const Duration(milliseconds: 500), () {
         setState(() => showSuccessDialog = true);
       });
     } else {
-      setState(() => resetPasswordState = UiState.error("Contraseña inválida"));
+      setState(() => resetPasswordState = UiState.error("Error al cambiar la contraseña."));
     }
+  } on DioException catch (e) {
+    final msg = e.response?.data['message'] ?? "Error inesperado";
+    setState(() => resetPasswordState = UiState.error(msg));
+  }
   }
 
   bool isValidPassword(String pwd, String confirmPwd) {

@@ -25,7 +25,7 @@ class ReservationRepositoryImpl implements ReservationRepository {
         status.name,
       );
       return Result.success(null); // Asumimos éxito si no hay excepción
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       return Result.failure(e.message ?? 'Error al actualizar estado');
     }
   }
@@ -58,7 +58,7 @@ class ReservationRepositoryImpl implements ReservationRepository {
 
 extension ReservationDtoMapper on ReservationDto {
   StudentReservation toDomain() => StudentReservation(
-        id: id?.toString() ?? '',
+        id: id.toString() ?? '',
         routeId: routeId.toString(),
         studentName: studentName,
         age: age,

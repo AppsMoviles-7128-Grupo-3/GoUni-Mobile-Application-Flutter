@@ -57,7 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => authState = UiState.loading());
 
     try {
-      final dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8080/api/')); // Usa 10.0.2.2 si estás en Android Emulator
+      final dio = Dio(BaseOptions(baseUrl: 'https://adaptable-clarity-production.up.railway.app/api/')); // Usa 10.0.2.2 si estás en Android Emulator
       final userApi = UserApi(dio);
       final authRepository = AuthRepositoryImpl(userApi);
 

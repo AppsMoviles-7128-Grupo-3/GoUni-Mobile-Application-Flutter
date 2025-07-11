@@ -14,11 +14,11 @@ class LoginPage extends StatefulWidget {
   final VoidCallback onNavigateToForgotPassword;
 
   const LoginPage({
-    Key? key,
+    super.key,
     required this.onSignInSuccess,
     required this.onNavigateToSignUp,
     required this.onNavigateToForgotPassword,
-  }) : super(key: key);
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   UiState<User>? _authState;
   User? _currentUser;
 
-  final Dio dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8080/api/'));  // http://192.168.18.X:8080/api/
+  final Dio dio = Dio(BaseOptions(baseUrl: 'https://adaptable-clarity-production.up.railway.app/api/'));  // http://192.168.18.X:8080/api/
   late final UserApi _userApi = UserApi(dio);
   late final AuthRepository _authRepository;
 

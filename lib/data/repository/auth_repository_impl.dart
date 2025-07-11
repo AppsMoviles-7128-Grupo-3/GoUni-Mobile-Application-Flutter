@@ -16,16 +16,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
     try {
       final response = await userApi.login(email, password);
-      print("Respuesta del login: ${response?.toJson()}"); // 👈 Aquí
+      print("Respuesta del login: ${response.toJson()}"); // 👈 Aquí
 
-      if (response != null) {
-        final user = response.toDomain();
-        _currentUser = user;
-        return Result.success(user);
-      } else {
-        return Result.failure("Email o contraseña incorrecta");
-      }
-    } on DioError catch (e) {
+      final user = response.toDomain();
+      _currentUser = user;
+      return Result.success(user);
+        } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         //return Result.failure("Email o contraseña incorrecta");
         print("Error en login: ${e.response?.data}"); // 👈 Aquí
@@ -53,13 +49,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await userApi.register(dto, password);
 
       // 👉 Imprime la respuesta para ver qué devuelve el backend
-      print("Respuesta registro: ${response?.toJson()}");
+      print("Respuesta registro: ${response.toJson()}");
 
-      if (response != null) {
-        return Result.success(response.toDomain());
-      }
-      return Result.failure("Error en el registro");
-    } on DioError catch (e) {
+      return Result.success(response.toDomain());
+          return Result.failure("Error en el registro");
+    } on DioException catch (e) {
       return Result.failure(e.message ?? "Error en el registro");
     }
     
@@ -71,13 +65,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final dto = user.toDto();
       final passwordParam = password.isNotEmpty ? password : null;
       final response = await userApi.edit(int.parse(user.id), dto, password: passwordParam);
-      if (response != null) {
-        final updated = response.toDomain();
-        _currentUser = updated;
-        return Result.success(updated);
-      }
-      return Result.failure("Error al actualizar usuario");
-    } on DioError catch (e) {
+      final updated = response.toDomain();
+      _currentUser = updated;
+      return Result.success(updated);
+          return Result.failure("Error al actualizar usuario");
+    } on DioException catch (e) {
       return Result.failure(e.message ?? "Error desconocido");
     }
   }
@@ -131,7 +123,7 @@ class AuthRepositoryImpl implements AuthRepository {
       } else {
         return Result.failure(message.isEmpty ? "Unknown error" : message);
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       final message = e.response?.data?.toString() ?? e.message ?? "Error desconocido";
       return Result.failure(message);
     }

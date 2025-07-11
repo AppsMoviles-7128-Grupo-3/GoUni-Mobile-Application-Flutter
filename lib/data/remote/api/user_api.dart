@@ -31,11 +31,14 @@ class UserApi {
   }
 
   Future<Response> resetPassword(String email, String newPassword) async {
-    return await _dio.post(
-      '/api/users/reset-password',
-      queryParameters: {'email': email, 'newPassword': newPassword},
-    );
-  }
+  return await _dio.post(
+    '/api/users/reset-password',
+    queryParameters: {
+      'email': email,
+      'newPassword': newPassword,
+    },
+  );
+}
 
   Future<UserDto> edit(int id, UserDto user, {String? password}) async {
     final response = await _dio.put(
