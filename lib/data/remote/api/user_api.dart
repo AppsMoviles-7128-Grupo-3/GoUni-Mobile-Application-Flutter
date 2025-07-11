@@ -50,4 +50,5 @@ class UserApi {
     final response = await _dio.get('/api/users/$id');
     return UserDto.fromJson(response.data);
   }
+
 }

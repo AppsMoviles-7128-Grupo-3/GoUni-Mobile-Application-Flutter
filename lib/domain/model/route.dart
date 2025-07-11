@@ -13,6 +13,7 @@ class Route {
   final double price;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? driverName; // <-- Cambiado a nullable
 
   Route({
     required this.id,
@@ -27,6 +28,7 @@ class Route {
     required this.price,
     required this.createdAt,
     required this.updatedAt,
+    this.driverName, // <-- Cambiado a nullable
   });
 
   factory Route.fromJson(Map<String, dynamic> json) {

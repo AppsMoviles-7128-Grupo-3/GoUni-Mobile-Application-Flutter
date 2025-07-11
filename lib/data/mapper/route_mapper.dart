@@ -12,17 +12,33 @@ extension RouteDtoMapper on RouteDto {
       end: end,
       days: days,
       departureTime: TimeOfDay(
-        hour: departureTime['hour'],
-        minute: departureTime['minute'],
+        hour: (departureTime[0] as num).toInt(),
+        minute: (departureTime[1] as num).toInt(),
       ),
       arrivalTime: TimeOfDay(
-        hour: arrivalTime['hour'],
-        minute: arrivalTime['minute'],
+        hour: (arrivalTime[0] as num).toInt(),
+        minute: (arrivalTime[1] as num).toInt(),
       ),
       availableSeats: availableSeats,
       price: price,
-      createdAt: DateTime.parse(createdAt),
-      updatedAt: DateTime.parse(updatedAt),
+      createdAt: DateTime(
+        (createdAt[0] as num).toInt(),
+        (createdAt[1] as num).toInt(),
+        (createdAt[2] as num).toInt(),
+        (createdAt[3] as num).toInt(),
+        (createdAt[4] as num).toInt(),
+        (createdAt[5] as num).toInt(),
+        (createdAt[6] as num).toInt(),
+      ),
+      updatedAt: DateTime(
+        (updatedAt[0] as num).toInt(),
+        (updatedAt[1] as num).toInt(),
+        (updatedAt[2] as num).toInt(),
+        (updatedAt[3] as num).toInt(),
+        (updatedAt[4] as num).toInt(),
+        (updatedAt[5] as num).toInt(),
+        (updatedAt[6] as num).toInt(),
+      ),
     );
   }
 }

@@ -11,6 +11,7 @@ import 'package:gouni_flutter/features/trips/presentation/screens/search_trips_s
 import 'package:gouni_flutter/features/trips/presentation/screens/trip_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:gouni_flutter/domain/provider/user_provider.dart';
+import 'package:gouni_flutter/domain/model/route.dart' as domain;
 
 void main() {
   runApp(
@@ -72,9 +73,9 @@ class GoUniApp extends StatelessWidget {
               builder: (context) => const SearchTripsScreen(),
             );
           case '/trip-detail':
-            final tripData = settings.arguments as Map<String, dynamic>;
+            final route = settings.arguments as domain.Route;
             return MaterialPageRoute(
-              builder: (context) => TripDetailScreen(tripData: tripData),
+              builder: (context) => TripDetailScreen(route: route),
             );
           // Agrega aquí más rutas según tus necesidades
           default:

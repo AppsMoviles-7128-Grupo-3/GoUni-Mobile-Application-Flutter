@@ -16,8 +16,9 @@ class RouteApi {
   // Obtener todas las rutas
   Future<List<RouteDto>> getAll() async {
     final response = await _dio.get('/api/routes');
+    // Aquí response.data debe ser una lista
     return (response.data as List)
-        .map((json) => RouteDto.fromJson(json))
+        .map((json) => RouteDto.fromJson(json as Map<String, dynamic>))
         .toList();
   }
 

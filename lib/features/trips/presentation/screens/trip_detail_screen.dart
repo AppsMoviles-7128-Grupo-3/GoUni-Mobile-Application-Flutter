@@ -2,12 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:gouni_flutter/core/constants/app_colors.dart';
 import 'package:gouni_flutter/core/widgets/custom_button.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/booking_confirmation_screen.dart';
+import 'package:gouni_flutter/domain/model/route.dart' as domain;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:gouni_flutter/data/remote/api/car_api.dart';
+import 'package:gouni_flutter/data/mapper/car_mapper.dart';
+import 'package:gouni_flutter/domain/model/car.dart';
+import 'package:dio/dio.dart';
+import 'package:gouni_flutter/data/remote/api/user_api.dart';
+import 'package:gouni_flutter/domain/model/user.dart';
 
-class TripDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> tripData;
+class TripDetailScreen extends StatefulWidget {
+  final domain.Route route;
+  const TripDetailScreen({super.key, required this.route});
 
-  const TripDetailScreen({super.key, required this.tripData});
+  @override
+  State<TripDetailScreen> createState() => _TripDetailScreenState();
+}
+
+class _TripDetailScreenState extends State<TripDetailScreen> {
+  Car? _car;
+  bool _loadingCar = true;
+  String? _driverName;
+  bool _loadingDriver = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCar();
+    _fetchDriverName();
+  }
+
+  Future<void> _fetchCar() async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8080/api/'));
+    final carApi = CarApi(dio);
+    final carDto = await carApi.getCarById(widget.route.carId);
+    setState(() {
+      _car = carDto.toDomain();
+      _loadingCar = false;
+    });
+  }
+
+  Future<void> _fetchDriverName() async {
+    final dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8080/api/'));
+    final userApi = UserApi(dio);
+    try {
+      final user = await userApi.getById(widget.route.userId);
+      setState(() {
+        _driverName = user.name;
+        _loadingDriver = false;
+      });
+    } catch (e) {
+      setState(() {
+        _driverName = 'Desconocido';
+        _loadingDriver = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +67,8 @@ class TripDetailScreen extends StatelessWidget {
         child: Column(
           children: [
             _buildDriverInfo(),
-            _buildTripDetails(),
-            _buildMapSection(), // <-- Aquí se muestra el mapa
+            _buildTripDetails(context),
+            _buildMapSection(),
             _buildTripDescription(),
             _buildBookingButton(context),
           ],
@@ -28,6 +78,7 @@ class TripDetailScreen extends StatelessWidget {
   }
 
   Widget _buildDriverInfo() {
+    // Puedes obtener el nombre del conductor desde otro modelo si lo tienes
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -44,7 +95,7 @@ class TripDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tripData['driver'] as String,
+                    'Conductor: ${_loadingDriver ? "Cargando..." : (_driverName ?? "Desconocido")}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -55,10 +106,7 @@ class TripDetailScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 20),
                       const SizedBox(width: 5),
-                      Text(
-                        tripData['rating'].toString(),
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                      const Text('4.8'), // Rating simulado
                     ],
                   ),
                   const SizedBox(height: 5),
@@ -69,7 +117,9 @@ class TripDetailScreen extends StatelessWidget {
                       const Text('Placa:'),
                       const SizedBox(width: 5),
                       Text(
-                        'A1B-234',
+                        _loadingCar
+                          ? 'Cargando...'
+                          : (_car?.licensePlate ?? 'Sin placa'),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -92,75 +142,60 @@ class TripDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTripDetails() {
+  Widget _buildTripDetails(BuildContext context) {
+    // Mapa de traducción de días
+    final Map<String, String> daysMap = {
+      'MONDAY': 'Lunes',
+      'TUESDAY': 'Martes',
+      'WEDNESDAY': 'Miércoles',
+      'THURSDAY': 'Jueves',
+      'FRIDAY': 'Viernes',
+      'SATURDAY': 'Sábado',
+      'SUNDAY': 'Domingo',
+    };
+
+    // Traduce y formatea los días
+    String daysEs = widget.route.days
+        .map((d) => daysMap[d.toUpperCase()] ?? d)
+        .map((d) => d[0].toUpperCase() + d.substring(1).toLowerCase())
+        .join(', ');
+
+    Widget detailRow(IconData icon, String label, String value) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.primary, size: 22),
+            const SizedBox(width: 12),
+            Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Row(
-              children: [
-                Icon(Icons.location_on, color: Colors.red),
-                SizedBox(width: 10),
-                Text(
-                  'Punto de encuentro',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const Padding(
-              padding: EdgeInsets.only(left: 34, top: 5, bottom: 15),
-              child: Text('Av. La Marina 2810, San Miguel'),
-            ),
-            const Row(
-              children: [
-                Icon(Icons.flag, color: Colors.green),
-                SizedBox(width: 10),
-                Text(
-                  'Destino',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 34, top: 5, bottom: 15),
-              child: Text(tripData['destination'] as String),
-            ),
-            const Row(
-              children: [
-                Icon(Icons.access_time),
-                SizedBox(width: 10),
-                Text(
-                  'Hora de salida',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 34, top: 5, bottom: 15),
-              child: Text(tripData['time'] as String),
-            ),
-            const Row(
-              children: [
-                Icon(Icons.attach_money),
-                SizedBox(width: 10),
-                Text(
-                  'Precio por asiento',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 34, top: 5),
-              child: Text(
-                tripData['price'] as String,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            detailRow(Icons.location_on, 'Origen', widget.route.start),
+            detailRow(Icons.flag, 'Destino', widget.route.end),
+            detailRow(Icons.calendar_today, 'Días', daysEs),
+            detailRow(Icons.access_time, 'Hora de salida', widget.route.departureTime.format(context)),
+            detailRow(Icons.attach_money, 'Precio por asiento', 'S/ ${widget.route.price.toStringAsFixed(2)}'),
+            detailRow(Icons.event_seat, 'Asientos disponibles', '${widget.route.availableSeats}'),
           ],
         ),
       ),
@@ -168,7 +203,7 @@ class TripDetailScreen extends StatelessWidget {
   }
 
   Widget _buildMapSection() {
-    // Coordenadas de ejemplo, reemplaza por las reales de tu modelo
+    // Coordenadas de ejemplo, reemplaza por las reales si las tienes en tu modelo
     final LatLng start = const LatLng(-12.0921, -77.0465); // San Miguel
     final LatLng end = const LatLng(-12.1057, -76.9634);   // Monterrico
 
@@ -217,9 +252,7 @@ class TripDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Viaje directo desde San Miguel hasta el campus de la UPC. '
-            'El conductor tiene buena reputación y puntualidad. '
-            'El vehículo es un Toyota Corolla 2020 con aire acondicionado.',
+            'Viaje directo. El conductor tiene buena reputación y puntualidad.',
           ),
           const SizedBox(height: 20),
           const Text(
@@ -287,7 +320,10 @@ class TripDetailScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BookingConfirmationScreen(tripData: tripData),
+              builder: (context) => BookingConfirmationScreen(tripData: {
+                // Puedes pasar el modelo completo o solo los datos necesarios
+                'route': widget.route,
+              }),
             ),
           );
         },
