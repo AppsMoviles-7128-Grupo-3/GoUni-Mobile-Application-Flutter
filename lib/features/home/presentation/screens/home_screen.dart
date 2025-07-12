@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gouni_flutter/core/constants/app_colors.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/search_trips_screen.dart';
 import 'package:gouni_flutter/features/home/presentation/screens/profile_screen.dart';
-// import 'package:gouni_flutter/features/trips/presentation/screens/trips_screen.dart'; // Commented out as TripsScreen does not exist
+import 'package:gouni_flutter/features/trips/presentation/screens/my_bookings_screen_new.dart';
+import 'package:gouni_flutter/domain/provider/booking_provider.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const HomeContentScreen(),
     const SearchTripsScreen(),
-    Placeholder(), 
+    const MyBookingsScreen(),
     const ProfileScreen(),
   ];
 
@@ -25,19 +27,66 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Buscar'),
-          BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Mis viajes'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-        ],
+      bottomNavigationBar: Consumer<BookingProvider>(
+        builder: (context, bookingProvider, child) {
+          return BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) => setState(() => _currentIndex = index),
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: Colors.grey,
+            items: [
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Inicio',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.search),
+                label: 'Buscar',
+              ),
+              BottomNavigationBarItem(
+                icon: _buildBookingIcon(bookingProvider.bookings.length),
+                label: 'Mis viajes',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Perfil',
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildBookingIcon(int bookingCount) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        const Icon(Icons.directions_car),
+        if (bookingCount > 0)
+          Positioned(
+            right: -6,
+            top: -6,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Text(
+                '$bookingCount',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -56,15 +105,17 @@ class HomeContentScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               '¡Hola, Estudiante!',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             const Text(
               'Encuentra tu próximo viaje compartido',
               style: TextStyle(color: Colors.grey),
             ),
+            const SizedBox(height: 20),
+            _buildQuickStats(context),
             const SizedBox(height: 30),
             _buildSearchCard(context),
             const SizedBox(height: 30),
@@ -81,26 +132,112 @@ class HomeContentScreen extends StatelessWidget {
             ),
             const SizedBox(height: 15),
             _buildFeaturesGrid(),
+            const SizedBox(height: 20),
+            // Botón temporal para pruebas
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(context, '/booking-test');
+              },
+              icon: const Icon(Icons.bug_report),
+              label: const Text('Pruebas de Reservas'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey.shade200,
+                foregroundColor: Colors.grey.shade700,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildQuickStats(BuildContext context) {
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final bookingCount = bookingProvider.bookings.length;
+        final confirmedBookings = bookingProvider.bookings
+            .where((b) => b.status == 'Confirmada')
+            .length;
+
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem(
+                  icon: Icons.book_online,
+                  label: 'Reservas',
+                  value: '$bookingCount',
+                  color: Colors.blue,
+                ),
+                _buildStatItem(
+                  icon: Icons.check_circle,
+                  label: 'Confirmadas',
+                  value: '$confirmedBookings',
+                  color: Colors.green,
+                ),
+                _buildStatItem(
+                  icon: Icons.savings,
+                  label: 'Ahorrado',
+                  value: 'S/ ${_calculateSavings(bookingProvider.bookings)}',
+                  color: Colors.orange,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
+    );
+  }
+
+  String _calculateSavings(List<BookingItem> bookings) {
+    // Simulamos un ahorro del 30% comparado con taxi
+    final totalSpent = bookings.fold<double>(
+      0,
+      (sum, booking) => sum + (booking.route.price * booking.passengers),
+    );
+    final estimatedSavings = totalSpent * 0.3;
+    return estimatedSavings.toStringAsFixed(0);
+  }
+
   Widget _buildSearchCard(BuildContext context) {
     return Card(
       elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const SearchTripsScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const SearchTripsScreen()),
           );
         },
         child: Padding(
@@ -115,8 +252,8 @@ class HomeContentScreen extends StatelessWidget {
                   Text(
                     'Buscar viaje',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Text(
                     'Encuentra compañeros de viaje',

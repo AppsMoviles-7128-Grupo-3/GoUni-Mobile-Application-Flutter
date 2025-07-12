@@ -30,7 +30,7 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
     'JUEVES',
     'VIERNES',
     'SABADO',
-    'DOMINGO'
+    'DOMINGO',
   ];
 
   final Map<String, String> _daysMap = {
@@ -84,9 +84,9 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
     if (_selectedDay != null) {
       // Si usas el mapa, filtra así:
       final backendDay = _daysMap[_selectedDay!] ?? _selectedDay!;
-      filtered = filtered.where((route) =>
-        route.days.contains(backendDay)
-      ).toList();
+      filtered = filtered
+          .where((route) => route.days.contains(backendDay))
+          .toList();
     }
     if (_selectedTime != null) {
       filtered = filtered.where((route) {
@@ -95,10 +95,13 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
       }).toList();
     }
     if (_searchText.isNotEmpty) {
-      filtered = filtered.where((route) =>
-        route.start.toLowerCase().contains(_searchText.toLowerCase()) ||
-        route.end.toLowerCase().contains(_searchText.toLowerCase())
-      ).toList();
+      filtered = filtered
+          .where(
+            (route) =>
+                route.start.toLowerCase().contains(_searchText.toLowerCase()) ||
+                route.end.toLowerCase().contains(_searchText.toLowerCase()),
+          )
+          .toList();
     }
     setState(() {
       _filteredRoutes = filtered;
@@ -148,7 +151,9 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
                     items: _daysMap.keys.map((dayEs) {
                       return DropdownMenuItem(
                         value: dayEs,
-                        child: Text(dayEs[0] + dayEs.substring(1).toLowerCase()),
+                        child: Text(
+                          dayEs[0] + dayEs.substring(1).toLowerCase(),
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -189,10 +194,10 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
               onPressed: _loading ? null : _fetchRoutes,
               child: _loading
                   ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Buscar viajes'),
             ),
             const SizedBox(height: 16),
@@ -203,23 +208,125 @@ class _SearchTripsScreenState extends State<SearchTripsScreen> {
                 child: _filteredRoutes!.isEmpty
                     ? const Center(child: Text('No hay rutas disponibles.'))
                     : ListView.builder(
-                  itemCount: _filteredRoutes!.length,
-                  itemBuilder: (context, index) {
-                    final route = _filteredRoutes![index];
-                    return ListTile(
-                      title: Text('${route.start} → ${route.end}'),
-                      subtitle: Text(
-                          'Salida: ${route.departureTime.format(context)} - S/${route.price}'),
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/trip-detail',
-                          arguments: route,
-                        );
-                      },
-                    );
-                  },
-                ),
+                        itemCount: _filteredRoutes!.length,
+                        itemBuilder: (context, index) {
+                          final route = _filteredRoutes![index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/trip-detail',
+                                  arguments: route,
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Ruta principal
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.location_on,
+                                          color: Colors.blue,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            '${route.start} → ${route.end}',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    // Información adicional
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time,
+                                          size: 16,
+                                          color: Colors.grey,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Salida: ${route.departureTime.format(context)}',
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        const Icon(
+                                          Icons.event_seat,
+                                          size: 16,
+                                          color: Colors.grey,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${route.availableSeats} asientos',
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+
+                                    // Precio y botón de reserva
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'S/ ${route.price.toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/trip-detail',
+                                              arguments: route,
+                                            );
+                                          },
+                                          icon: const Icon(
+                                            Icons.book_online,
+                                            size: 16,
+                                          ),
+                                          label: const Text('Reservar'),
+                                          style: ElevatedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 8,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
               ),
           ],
         ),

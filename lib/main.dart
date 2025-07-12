@@ -1,6 +1,5 @@
 //import 'package:gouni_flutter/features/auth/presentation/screens/login_screen.dart';
 
-
 import 'package:flutter/material.dart';
 import 'package:gouni_flutter/presentation/forgot_password_page.dart';
 import 'package:gouni_flutter/presentation/login_page.dart';
@@ -9,8 +8,10 @@ import 'package:gouni_flutter/presentation/reset_password_page.dart';
 import 'package:gouni_flutter/features/home/presentation/screens/home_screen.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/search_trips_screen.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/trip_detail_screen.dart';
+import 'package:gouni_flutter/features/trips/presentation/screens/booking_test_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:gouni_flutter/domain/provider/user_provider.dart';
+import 'package:gouni_flutter/domain/provider/booking_provider.dart';
 import 'package:gouni_flutter/domain/model/route.dart' as domain;
 
 void main() {
@@ -18,6 +19,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
       ],
       child: const GoUniApp(),
     ),
@@ -57,7 +59,11 @@ class GoUniApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (context) => RegisterPage(
                 onSignUpSuccess: (userId) {
-                  Navigator.pushNamedAndRemoveUntil(context, '/signin', (r) => false);
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/signin',
+                    (r) => false,
+                  );
                 },
                 onNavegateToLogin: () {
                   Navigator.popUntil(context, ModalRoute.withName('/signin'));
@@ -65,9 +71,7 @@ class GoUniApp extends StatelessWidget {
               ),
             );
           case '/home':
-            return MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            );
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
           case '/search-trips':
             return MaterialPageRoute(
               builder: (context) => const SearchTripsScreen(),
@@ -76,6 +80,10 @@ class GoUniApp extends StatelessWidget {
             final route = settings.arguments as domain.Route;
             return MaterialPageRoute(
               builder: (context) => TripDetailScreen(route: route),
+            );
+          case '/booking-test':
+            return MaterialPageRoute(
+              builder: (context) => const BookingTestScreen(),
             );
           // Agrega aquí más rutas según tus necesidades
           default:
