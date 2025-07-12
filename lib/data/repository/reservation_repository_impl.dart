@@ -12,21 +12,47 @@ class ReservationRepositoryImpl implements ReservationRepository {
 
   @override
   Stream<List<StudentReservation>> getReservations(String driverId) async* {
-    // TODO: debes implementar en el backend la lógica si necesitas
-    yield <StudentReservation>[]; 
+    try {
+      final response = await reservationApi.getByDriverId(int.parse(driverId));
+      final reservations = response.map((dto) => dto.toDomain()).toList();
+      yield reservations;
+    } catch (_) {
+      yield <StudentReservation>[];
+    }
   }
 
   @override
   Future<Result<void>> updateReservationStatus(
       String reservationId, ReservationStatus status) async {
     try {
-      final response = await reservationApi.updateStatus(
+      await reservationApi.updateStatus(
         int.parse(reservationId),
         status.name,
       );
-      return Result.success(null); // Asumimos éxito si no hay excepción
+      return Result.success(null);
     } on DioException catch (e) {
       return Result.failure(e.message ?? 'Error al actualizar estado');
+    }
+  }
+
+  @override
+  Future<Result<StudentReservation>> createReservation(StudentReservation reservation) async {
+    try {
+      final response = await reservationApi.create(reservation.toDto());
+      return Result.success(response.toDomain());
+    } on DioException catch (e) {
+      return Result.failure(e.message ?? 'Error al crear reserva');
+    }
+  }
+
+  @override
+  Future<Result<List<StudentReservation>>> getReservationsByPassenger(int passengerId) async {
+    try {
+      final response = await reservationApi.getByPassengerId(passengerId);
+      final reservations = response.map((dto) => dto.toDomain()).toList();
+      return Result.success(reservations);
+    } on DioException catch (e) {
+      return Result.failure(e.message ?? 'Error al obtener reservas');
     }
   }
 
@@ -40,26 +66,14 @@ class ReservationRepositoryImpl implements ReservationRepository {
       yield [];
     }
   }
-
-  Stream<List<StudentReservation>> getReservationsByPassenger(String passengerId) async* {
-    try {
-      final response = await reservationApi.getByPassengerId(int.parse(passengerId));
-      final reservations = response.map((dto) => dto.toDomain()).toList();
-      yield reservations;
-    } catch (_) {
-      yield [];
-    }
-  }
-
-  Future<void> createReservation(StudentReservation reservation) async {
-    await reservationApi.create(reservation.toDto());
-  }
 }
 
 extension ReservationDtoMapper on ReservationDto {
   StudentReservation toDomain() => StudentReservation(
-        id: id.toString() ?? '',
-        routeId: routeId.toString(),
+        id: id,
+        routeId: routeId,
+        driverId: driverId,
+        passengerId: passengerId,
         studentName: studentName,
         age: age,
         meetingPlace: meetingPlace,

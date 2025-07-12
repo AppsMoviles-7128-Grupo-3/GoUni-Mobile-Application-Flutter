@@ -39,4 +39,12 @@ class ReservationApi {
         .map((json) => ReservationDto.fromJson(json))
         .toList();
   }
+  
+  // Obtener reservas por ID de conductor
+  Future<List<ReservationDto>> getByDriverId(int driverId) async {
+    final response = await _dio.get('/api/reservations/driver/$driverId');
+    return (response.data as List)
+        .map((json) => ReservationDto.fromJson(json))
+        .toList();
+  }
 }

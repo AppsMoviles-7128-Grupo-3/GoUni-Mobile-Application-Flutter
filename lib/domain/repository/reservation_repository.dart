@@ -15,9 +15,13 @@ class Result<T> {
 
 abstract class ReservationRepository {
   Stream<List<StudentReservation>> getReservations(String driverId);
-
+  
   Future<Result<void>> updateReservationStatus(
     String reservationId,
     ReservationStatus status,
   );
+  
+  Future<Result<StudentReservation>> createReservation(StudentReservation reservation);
+  
+  Future<Result<List<StudentReservation>>> getReservationsByPassenger(int passengerId);
 }

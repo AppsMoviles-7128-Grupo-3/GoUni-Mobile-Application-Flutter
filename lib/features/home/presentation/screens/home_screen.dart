@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gouni_flutter/core/constants/app_colors.dart';
 import 'package:gouni_flutter/features/trips/presentation/screens/search_trips_screen.dart';
 import 'package:gouni_flutter/features/home/presentation/screens/profile_screen.dart';
-// import 'package:gouni_flutter/features/trips/presentation/screens/trips_screen.dart'; // Commented out as TripsScreen does not exist
+import 'package:gouni_flutter/features/trips/presentation/screens/my_reservations_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const HomeContentScreen(),
     const SearchTripsScreen(),
-    Placeholder(), 
+    const MyReservationsScreen(), 
     const ProfileScreen(),
   ];
 
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Buscar'),
-          BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Mis viajes'),
+          BottomNavigationBarItem(icon: Icon(Icons.event_seat), label: 'Mis Reservas'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),

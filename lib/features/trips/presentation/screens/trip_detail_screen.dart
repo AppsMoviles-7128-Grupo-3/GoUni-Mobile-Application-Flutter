@@ -320,10 +320,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BookingConfirmationScreen(tripData: {
-                // Puedes pasar el modelo completo o solo los datos necesarios
-                'route': widget.route,
-              }),
+              builder: (context) => BookingConfirmationScreen(route: widget.route),
             ),
           );
         },
